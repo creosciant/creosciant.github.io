@@ -475,7 +475,7 @@
             container.style.transform = `perspective(1000px) rotateX(${moveY}deg) rotateY(${moveX}deg)`;
         });
 
-        document.addEventListener('mouseleave', function() {
+        document.querySelector('body').addEventListener('mouseleave', function() {
             const container = document.querySelector('.container');
             container.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
         });
