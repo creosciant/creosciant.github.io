@@ -501,8 +501,8 @@
     <audio id="music-player" preload="auto"></audio>
     <div class="music-player">
         <div class="music-info">
-            <div class="song-title" id="song-title">Imagination</div>
-            <div class="song-artist" id="song-artist">xander.</div>
+            <div class="song-title" id="song-title">Loading...</div>
+            <div class="song-artist" id="song-artist">Artist</div>
         </div>
         <div class="progress-bar">
             <div class="progress-fill" id="progress-fill"></div>
@@ -669,6 +669,126 @@
     </div>
 
     <script>
+        const playlist = [
+            {
+                title: "Imagination",
+                artist: "xander.",
+                url: "Imagination.mp3"
+            }
+        ];
+        
+        const audio = document.getElementById('music-player');
+        const titleEl = document.getElementById('song-title');
+        const artistEl = document.getElementById('song-artist');
+        const progressFill = document.getElementById('progress-fill');
+        const playBtn = document.getElementById('play-pause-btn');
+        const playIcon = document.getElementById('play-icon');
+        const pauseIcon = document.getElementById('pause-icon');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const shuffleBtn = document.getElementById('shuffle-btn');
+        const volumeSlider = document.getElementById('volume-slider');
+
+        let currentIndex = 0;
+        let isShuffling = false;
+
+        function loadSong(index) {
+            const song = playlist[index];
+            audio.src = song.url;
+            titleEl.textContent = song.title;
+            artistEl.textContent = song.artist;
+
+            // scrolling effect if title is long
+            if (song.title.length > 15) {
+                titleEl.classList.add("scrolling");
+            } else {
+                titleEl.classList.remove("scrolling");
+            }
+        }
+
+        function playSong() {
+            audio.play();
+            playIcon.style.display = "none";
+            pauseIcon.style.display = "block";
+            }
+
+            function pauseSong() {
+            audio.pause();
+            playIcon.style.display = "block";
+            pauseIcon.style.display = "none";
+        }
+
+        function nextSong() {
+            if (isShuffling) {
+                currentIndex = Math.floor(Math.random() * playlist.length);
+            } else {
+                currentIndex = (currentIndex + 1) % playlist.length;
+            }
+            loadSong(currentIndex);
+            playSong();
+        }
+
+        function prevSong() {
+            currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+            loadSong(currentIndex);
+            playSong();
+        }
+
+        audio.addEventListener("timeupdate", () => {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progressFill.style.width = percent + "%";
+        });
+
+        audio.addEventListener("ended", nextSong);
+
+        playBtn.addEventListener("click", () => {
+            if (audio.paused) {
+                playSong();
+            } else {
+                pauseSong();
+            }
+        });
+
+        nextBtn.addEventListener("click", nextSong);
+        prevBtn.addEventListener("click", prevSong);
+
+        shuffleBtn.addEventListener("click", () => {
+            isShuffling = !isShuffling;
+            shuffleBtn.classList.toggle("active", isShuffling);
+        });
+
+        volumeSlider.addEventListener("input", () => {
+            audio.volume = volumeSlider.value / 100;
+        });
+
+        loadSong(currentIndex);
+        playSong();
+
+        async function tryAutoplay() {
+            try {
+                await audio.play();
+                console.log('Autoplay succeeded.');
+            } catch (err) {
+                console.log('Autoplay blocked — waiting for user interaction.');
+                const onUserGesture = () => {
+                    audio.play().catch(e => console.error(e));
+                    document.removeEventListener('click', onUserGesture);
+                    document.removeEventListener('keydown', onUserGesture);
+                    document.removeEventListener('touchstart', onUserGesture);
+                };
+                    document.addEventListener('click', onUserGesture, { once: true });
+                    document.addEventListener('keydown', onUserGesture, { once: true });
+                    document.addEventListener('touchstart', onUserGesture, { once: true });
+            }
+        }
+
+        window.addEventListener('load', tryAutoplay);
+
+
+/*        document.addEventListener("click", () => {
+            audio.muted = false;
+        }, { once: true}); */
+
         document.addEventListener('DOMContentLoaded', function() {
             const introButton = document.getElementById('introButton');
             const backButton = document.getElementById('backButton');
